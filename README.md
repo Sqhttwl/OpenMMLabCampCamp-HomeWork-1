@@ -8,4 +8,5 @@ configs/resnet/resnet101_8xb16_cifar10.py
 ```
 
 训练日志和权重在
+https://github.com/Sqhttwl/OpenMMLabCampCamp-HomeWork-1/releases/tag/Sqh-heigh
 
