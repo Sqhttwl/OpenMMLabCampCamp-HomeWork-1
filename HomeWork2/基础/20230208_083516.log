@@ -1,0 +1,2142 @@
+2023-02-08 08:35:16,863 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.7.16 (default, Jan 17 2023, 22:20:44) [GCC 11.2.0]
+CUDA available: True
+GPU 0: NVIDIA GeForce RTX 3090
+CUDA_HOME: /opt/conda
+NVCC: Cuda compilation tools, release 11.6, V11.6.124
+GCC: gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0
+PyTorch: 1.12.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.6.0 (Git Hash 52b5f107dd9cf10910aaa19cb47f3abf9b349815)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.6
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.3.2  (built against CUDA 11.5)
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.6, CUDNN_VERSION=8.3.2, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.12.1, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=OFF, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.13.1
+OpenCV: 4.7.0
+MMCV: 1.7.1
+MMCV Compiler: GCC 9.3
+MMCV CUDA Compiler: 11.6
+MMDetection: 2.28.0+1b7d778
+------------------------------------------------------------
+
+2023-02-08 08:35:18,257 - mmdet - INFO - Distributed training: False
+2023-02-08 08:35:19,399 - mmdet - INFO - Config:
+model = dict(
+    type='MaskRCNN',
+    backbone=dict(
+        type='ResNet',
+        depth=50,
+        num_stages=4,
+        out_indices=(0, 1, 2, 3),
+        frozen_stages=1,
+        norm_cfg=dict(type='BN', requires_grad=False),
+        norm_eval=True,
+        style='caffe',
+        init_cfg=dict(
+            type='Pretrained',
+            checkpoint='open-mmlab://detectron2/resnet50_caffe')),
+    neck=dict(
+        type='FPN',
+        in_channels=[256, 512, 1024, 2048],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+    roi_head=dict(
+        type='StandardRoIHead',
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=dict(
+            type='Shared2FCBBoxHead',
+            in_channels=256,
+            fc_out_channels=1024,
+            roi_feat_size=7,
+            num_classes=1,
+            bbox_coder=dict(
+                type='DeltaXYWHBBoxCoder',
+                target_means=[0.0, 0.0, 0.0, 0.0],
+                target_stds=[0.1, 0.1, 0.2, 0.2]),
+            reg_class_agnostic=False,
+            loss_cls=dict(
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+            loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
+        mask_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=14, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        mask_head=dict(
+            type='FCNMaskHead',
+            num_convs=4,
+            in_channels=256,
+            conv_out_channels=256,
+            num_classes=1,
+            loss_mask=dict(
+                type='CrossEntropyLoss', use_mask=True, loss_weight=1.0))),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=-1,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.5,
+                neg_iou_thr=0.5,
+                min_pos_iou=0.5,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=512,
+                pos_fraction=0.25,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=True),
+            mask_size=28,
+            pos_weight=-1,
+            debug=False)),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.05,
+            nms=dict(type='nms', iou_threshold=0.5),
+            max_per_img=100,
+            mask_thr_binary=0.5)))
+dataset_type = 'COCODataset'
+data_root = 'data/coco/'
+img_norm_cfg = dict(
+    mean=[103.53, 116.28, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='LoadAnnotations',
+        with_bbox=True,
+        with_mask=True,
+        poly2mask=False),
+    dict(
+        type='Resize',
+        img_scale=[(1333, 640), (1333, 672), (1333, 704), (1333, 736),
+                   (1333, 768), (1333, 800)],
+        multiscale_mode='value',
+        keep_ratio=True),
+    dict(type='RandomFlip', flip_ratio=0.5),
+    dict(
+        type='Normalize',
+        mean=[103.53, 116.28, 123.675],
+        std=[1.0, 1.0, 1.0],
+        to_rgb=False),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(1333, 800),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[103.53, 116.28, 123.675],
+                std=[1.0, 1.0, 1.0],
+                to_rgb=False),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=2,
+    workers_per_gpu=2,
+    train=dict(
+        type='CocoDataset',
+        ann_file='data/balloon/train/train.json',
+        img_prefix='data/balloon/train/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='LoadAnnotations',
+                with_bbox=True,
+                with_mask=True,
+                poly2mask=False),
+            dict(
+                type='Resize',
+                img_scale=[(1333, 640), (1333, 672), (1333, 704), (1333, 736),
+                           (1333, 768), (1333, 800)],
+                multiscale_mode='value',
+                keep_ratio=True),
+            dict(type='RandomFlip', flip_ratio=0.5),
+            dict(
+                type='Normalize',
+                mean=[103.53, 116.28, 123.675],
+                std=[1.0, 1.0, 1.0],
+                to_rgb=False),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(
+                type='Collect',
+                keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks'])
+        ],
+        classes=('balloon', )),
+    val=dict(
+        type='CocoDataset',
+        ann_file='data/balloon/val/val.json',
+        img_prefix='data/balloon/val/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(1333, 800),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[103.53, 116.28, 123.675],
+                        std=[1.0, 1.0, 1.0],
+                        to_rgb=False),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        classes=('balloon', )),
+    test=dict(
+        type='CocoDataset',
+        ann_file='data/balloon/val/val.json',
+        img_prefix='data/balloon/val/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(1333, 800),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[103.53, 116.28, 123.675],
+                        std=[1.0, 1.0, 1.0],
+                        to_rgb=False),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ],
+        classes=('balloon', )))
+evaluation = dict(metric='bbox', interval=1, save_best='auto')
+optimizer = dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=0.001,
+    step=[8, 11])
+runner = dict(type='EpochBasedRunner', max_epochs=100)
+checkpoint_config = dict(interval=10)
+log_config = dict(interval=50, hooks=[dict(type='TextLoggerHook')])
+custom_hooks = [dict(type='NumClassCheckHook')]
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+auto_scale_lr = dict(enable=False, base_batch_size=16)
+classes = ('balloon', )
+work_dir = './work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon'
+auto_resume = False
+gpu_ids = [0]
+
+2023-02-08 08:35:19,400 - mmdet - INFO - Set random seed to 460382314, deterministic: False
+2023-02-08 08:35:23,240 - mmdet - INFO - Automatic scaling of learning rate (LR) has been disabled.
+2023-02-08 08:35:23,257 - mmdet - INFO - Start running, host: root@156eed42b6a7, work_dir: /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon
+2023-02-08 08:35:23,258 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2023-02-08 08:35:23,259 - mmdet - INFO - workflow: [('train', 1)], max: 100 epochs
+2023-02-08 08:35:23,260 - mmdet - INFO - Checkpoints will be saved to /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon by HardDiskBackend.
+2023-02-08 08:35:47,691 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:35:47,821 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.000
+
+2023-02-08 08:35:47,823 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:35:47,823 - mmdet - INFO - Epoch(val) [1][13]	bbox_mAP: 0.0000, bbox_mAP_50: 0.0000, bbox_mAP_75: 0.0000, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0000, bbox_mAP_copypaste: 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000
+2023-02-08 08:36:12,611 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:36:12,904 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.026
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.026
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.026
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.036
+
+2023-02-08 08:36:34,290 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_2.pth.
+2023-02-08 08:36:34,291 - mmdet - INFO - Best bbox_mAP is 0.0003 at 2 epoch.
+2023-02-08 08:36:34,292 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:36:34,292 - mmdet - INFO - Epoch(val) [2][13]	bbox_mAP: 0.0003, bbox_mAP_50: 0.0020, bbox_mAP_75: 0.0000, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0003, bbox_mAP_copypaste: 0.0003 0.0020 0.0000 0.0000 0.0000 0.0003
+2023-02-08 08:36:57,738 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:36:58,026 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.001
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.038
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.038
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.038
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.053
+
+2023-02-08 08:36:58,100 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_2.pth was removed
+2023-02-08 08:37:07,161 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_3.pth.
+2023-02-08 08:37:07,161 - mmdet - INFO - Best bbox_mAP is 0.0004 at 3 epoch.
+2023-02-08 08:37:07,162 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:37:07,162 - mmdet - INFO - Epoch(val) [3][13]	bbox_mAP: 0.0004, bbox_mAP_50: 0.0028, bbox_mAP_75: 0.0001, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0006, bbox_mAP_copypaste: 0.0004 0.0028 0.0001 0.0000 0.0000 0.0006
+2023-02-08 08:37:29,539 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:37:29,706 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.001
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.006
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.001
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.050
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.050
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.050
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.069
+
+2023-02-08 08:37:29,791 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_3.pth was removed
+2023-02-08 08:37:43,440 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_4.pth.
+2023-02-08 08:37:43,440 - mmdet - INFO - Best bbox_mAP is 0.0009 at 4 epoch.
+2023-02-08 08:37:43,441 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:37:43,441 - mmdet - INFO - Epoch(val) [4][13]	bbox_mAP: 0.0009, bbox_mAP_50: 0.0062, bbox_mAP_75: 0.0000, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0012, bbox_mAP_copypaste: 0.0009 0.0062 0.0000 0.0000 0.0000 0.0012
+2023-02-08 08:38:04,602 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:38:04,755 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.001
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.008
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.002
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.078
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.078
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.078
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.108
+
+2023-02-08 08:38:04,837 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_4.pth was removed
+2023-02-08 08:38:29,251 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_5.pth.
+2023-02-08 08:38:29,251 - mmdet - INFO - Best bbox_mAP is 0.0015 at 5 epoch.
+2023-02-08 08:38:29,252 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:38:29,252 - mmdet - INFO - Epoch(val) [5][13]	bbox_mAP: 0.0015, bbox_mAP_50: 0.0077, bbox_mAP_75: 0.0002, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0020, bbox_mAP_copypaste: 0.0015 0.0077 0.0002 0.0000 0.0000 0.0020
+2023-02-08 08:38:52,162 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:38:52,370 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.005
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.007
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.142
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.142
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.142
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.197
+
+2023-02-08 08:38:52,460 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_5.pth was removed
+2023-02-08 08:39:12,849 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_6.pth.
+2023-02-08 08:39:12,849 - mmdet - INFO - Best bbox_mAP is 0.0049 at 6 epoch.
+2023-02-08 08:39:12,851 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:39:12,851 - mmdet - INFO - Epoch(val) [6][13]	bbox_mAP: 0.0049, bbox_mAP_50: 0.0245, bbox_mAP_75: 0.0005, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0066, bbox_mAP_copypaste: 0.0049 0.0245 0.0005 0.0000 0.0000 0.0066
+2023-02-08 08:39:36,307 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:39:36,522 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.150
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.014
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.054
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.164
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.164
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.164
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.228
+
+2023-02-08 08:39:36,612 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_6.pth was removed
+2023-02-08 08:39:47,971 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_7.pth.
+2023-02-08 08:39:47,971 - mmdet - INFO - Best bbox_mAP is 0.0416 at 7 epoch.
+2023-02-08 08:39:47,973 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:39:47,973 - mmdet - INFO - Epoch(val) [7][13]	bbox_mAP: 0.0416, bbox_mAP_50: 0.1500, bbox_mAP_75: 0.0140, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0540, bbox_mAP_copypaste: 0.0416 0.1500 0.0140 0.0000 0.0000 0.0540
+2023-02-08 08:40:08,540 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:40:08,655 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.071
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.203
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.029
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.094
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.200
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.200
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.200
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.278
+
+2023-02-08 08:40:08,724 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_7.pth was removed
+2023-02-08 08:40:24,058 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_8.pth.
+2023-02-08 08:40:24,059 - mmdet - INFO - Best bbox_mAP is 0.0709 at 8 epoch.
+2023-02-08 08:40:24,059 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:40:24,059 - mmdet - INFO - Epoch(val) [8][13]	bbox_mAP: 0.0709, bbox_mAP_50: 0.2032, bbox_mAP_75: 0.0295, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0936, bbox_mAP_copypaste: 0.0709 0.2032 0.0295 0.0000 0.0000 0.0936
+2023-02-08 08:40:45,471 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:40:45,596 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.239
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.014
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.102
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.194
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.194
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.194
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.269
+
+2023-02-08 08:40:45,661 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_8.pth was removed
+2023-02-08 08:40:56,408 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_9.pth.
+2023-02-08 08:40:56,408 - mmdet - INFO - Best bbox_mAP is 0.0765 at 9 epoch.
+2023-02-08 08:40:56,409 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:40:56,409 - mmdet - INFO - Epoch(val) [9][13]	bbox_mAP: 0.0765, bbox_mAP_50: 0.2393, bbox_mAP_75: 0.0139, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1023, bbox_mAP_copypaste: 0.0765 0.2393 0.0139 0.0000 0.0000 0.1023
+2023-02-08 08:41:12,380 - mmdet - INFO - Saving checkpoint at 10 epochs
+2023-02-08 08:41:34,366 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:41:34,516 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.069
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.214
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.009
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.091
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.196
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.196
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.196
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.272
+
+2023-02-08 08:41:34,517 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:41:34,517 - mmdet - INFO - Epoch(val) [10][13]	bbox_mAP: 0.0686, bbox_mAP_50: 0.2137, bbox_mAP_75: 0.0086, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0914, bbox_mAP_copypaste: 0.0686 0.2137 0.0086 0.0000 0.0000 0.0914
+2023-02-08 08:41:55,573 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:41:55,778 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.082
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.256
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.110
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:41:55,859 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_9.pth was removed
+2023-02-08 08:42:13,780 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_11.pth.
+2023-02-08 08:42:13,781 - mmdet - INFO - Best bbox_mAP is 0.0818 at 11 epoch.
+2023-02-08 08:42:13,783 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:42:13,783 - mmdet - INFO - Epoch(val) [11][13]	bbox_mAP: 0.0818, bbox_mAP_50: 0.2559, bbox_mAP_75: 0.0181, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1096, bbox_mAP_copypaste: 0.0818 0.2559 0.0181 0.0000 0.0000 0.1096
+2023-02-08 08:42:34,785 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:42:34,923 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.082
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.257
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.111
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:42:35,000 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_11.pth was removed
+2023-02-08 08:42:46,729 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_12.pth.
+2023-02-08 08:42:46,729 - mmdet - INFO - Best bbox_mAP is 0.0825 at 12 epoch.
+2023-02-08 08:42:46,729 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:42:46,729 - mmdet - INFO - Epoch(val) [12][13]	bbox_mAP: 0.0825, bbox_mAP_50: 0.2575, bbox_mAP_75: 0.0182, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1106, bbox_mAP_copypaste: 0.0825 0.2575 0.0182 0.0000 0.0000 0.1106
+2023-02-08 08:43:08,142 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:43:08,274 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.082
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.258
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.110
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.283
+
+2023-02-08 08:43:08,275 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:43:08,275 - mmdet - INFO - Epoch(val) [13][13]	bbox_mAP: 0.0820, bbox_mAP_50: 0.2576, bbox_mAP_75: 0.0181, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1099, bbox_mAP_copypaste: 0.0820 0.2576 0.0181 0.0000 0.0000 0.1099
+2023-02-08 08:43:29,476 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:43:29,630 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.079
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.243
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.020
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.106
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:43:29,632 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:43:29,632 - mmdet - INFO - Epoch(val) [14][13]	bbox_mAP: 0.0791, bbox_mAP_50: 0.2433, bbox_mAP_75: 0.0198, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1057, bbox_mAP_copypaste: 0.0791 0.2433 0.0198 0.0000 0.0000 0.1057
+2023-02-08 08:43:51,126 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:43:51,263 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.245
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.107
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:43:51,265 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:43:51,265 - mmdet - INFO - Epoch(val) [15][13]	bbox_mAP: 0.0797, bbox_mAP_50: 0.2449, bbox_mAP_75: 0.0208, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1066, bbox_mAP_copypaste: 0.0797 0.2449 0.0208 0.0000 0.0000 0.1066
+2023-02-08 08:44:12,746 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:44:12,995 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.079
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.242
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.020
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.105
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.283
+
+2023-02-08 08:44:12,997 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:44:12,997 - mmdet - INFO - Epoch(val) [16][13]	bbox_mAP: 0.0788, bbox_mAP_50: 0.2417, bbox_mAP_75: 0.0198, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1053, bbox_mAP_copypaste: 0.0788 0.2417 0.0198 0.0000 0.0000 0.1053
+2023-02-08 08:44:35,094 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:44:35,232 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.245
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.020
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.107
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.283
+
+2023-02-08 08:44:35,233 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:44:35,233 - mmdet - INFO - Epoch(val) [17][13]	bbox_mAP: 0.0799, bbox_mAP_50: 0.2449, bbox_mAP_75: 0.0203, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1069, bbox_mAP_copypaste: 0.0799 0.2449 0.0203 0.0000 0.0000 0.1069
+2023-02-08 08:44:56,997 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:44:57,183 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.246
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.107
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.283
+
+2023-02-08 08:44:57,185 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:44:57,185 - mmdet - INFO - Epoch(val) [18][13]	bbox_mAP: 0.0803, bbox_mAP_50: 0.2455, bbox_mAP_75: 0.0212, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1074, bbox_mAP_copypaste: 0.0803 0.2455 0.0212 0.0000 0.0000 0.1074
+2023-02-08 08:45:19,186 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:45:19,318 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.083
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.250
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.111
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:45:19,393 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_12.pth was removed
+2023-02-08 08:45:36,585 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_19.pth.
+2023-02-08 08:45:36,586 - mmdet - INFO - Best bbox_mAP is 0.0832 at 19 epoch.
+2023-02-08 08:45:36,586 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:45:36,587 - mmdet - INFO - Epoch(val) [19][13]	bbox_mAP: 0.0832, bbox_mAP_50: 0.2498, bbox_mAP_75: 0.0212, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1112, bbox_mAP_copypaste: 0.0832 0.2498 0.0212 0.0000 0.0000 0.1112
+2023-02-08 08:45:52,788 - mmdet - INFO - Saving checkpoint at 20 epochs
+2023-02-08 08:46:13,818 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:46:13,980 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.082
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.246
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.110
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:46:13,981 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:46:13,982 - mmdet - INFO - Epoch(val) [20][13]	bbox_mAP: 0.0820, bbox_mAP_50: 0.2465, bbox_mAP_75: 0.0205, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1096, bbox_mAP_copypaste: 0.0820 0.2465 0.0205 0.0000 0.0000 0.1096
+2023-02-08 08:46:35,483 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:46:35,620 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.083
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.248
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.111
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:46:35,622 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:46:35,622 - mmdet - INFO - Epoch(val) [21][13]	bbox_mAP: 0.0827, bbox_mAP_50: 0.2477, bbox_mAP_75: 0.0217, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1106, bbox_mAP_copypaste: 0.0827 0.2477 0.0217 0.0000 0.0000 0.1106
+2023-02-08 08:46:57,104 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:46:57,269 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.083
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.249
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.112
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:46:57,352 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_19.pth was removed
+2023-02-08 08:47:24,957 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_22.pth.
+2023-02-08 08:47:24,958 - mmdet - INFO - Best bbox_mAP is 0.0835 at 22 epoch.
+2023-02-08 08:47:24,958 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:47:24,958 - mmdet - INFO - Epoch(val) [22][13]	bbox_mAP: 0.0835, bbox_mAP_50: 0.2492, bbox_mAP_75: 0.0223, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1116, bbox_mAP_copypaste: 0.0835 0.2492 0.0223 0.0000 0.0000 0.1116
+2023-02-08 08:47:46,221 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:47:46,353 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.084
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.250
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.112
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.283
+
+2023-02-08 08:47:46,427 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_22.pth was removed
+2023-02-08 08:47:58,322 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_23.pth.
+2023-02-08 08:47:58,322 - mmdet - INFO - Best bbox_mAP is 0.0836 at 23 epoch.
+2023-02-08 08:47:58,324 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:47:58,324 - mmdet - INFO - Epoch(val) [23][13]	bbox_mAP: 0.0836, bbox_mAP_50: 0.2504, bbox_mAP_75: 0.0226, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1118, bbox_mAP_copypaste: 0.0836 0.2504 0.0226 0.0000 0.0000 0.1118
+2023-02-08 08:48:19,287 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:48:19,482 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.083
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.249
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.112
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+
+2023-02-08 08:48:19,484 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:48:19,484 - mmdet - INFO - Epoch(val) [24][13]	bbox_mAP: 0.0834, bbox_mAP_50: 0.2487, bbox_mAP_75: 0.0225, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1116, bbox_mAP_copypaste: 0.0834 0.2487 0.0225 0.0000 0.0000 0.1116
+2023-02-08 08:48:41,137 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:48:41,271 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.083
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.250
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.112
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.283
+
+2023-02-08 08:48:41,273 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:48:41,273 - mmdet - INFO - Epoch(val) [25][13]	bbox_mAP: 0.0833, bbox_mAP_50: 0.2495, bbox_mAP_75: 0.0225, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1115, bbox_mAP_copypaste: 0.0833 0.2495 0.0225 0.0000 0.0000 0.1115
+2023-02-08 08:49:03,337 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:49:03,500 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.084
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.253
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.113
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.289
+
+2023-02-08 08:49:03,577 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_23.pth was removed
+2023-02-08 08:49:18,784 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_26.pth.
+2023-02-08 08:49:18,784 - mmdet - INFO - Best bbox_mAP is 0.0842 at 26 epoch.
+2023-02-08 08:49:18,784 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:49:18,784 - mmdet - INFO - Epoch(val) [26][13]	bbox_mAP: 0.0842, bbox_mAP_50: 0.2529, bbox_mAP_75: 0.0227, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1127, bbox_mAP_copypaste: 0.0842 0.2529 0.0227 0.0000 0.0000 0.1127
+2023-02-08 08:49:40,274 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:49:40,434 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.085
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.254
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.113
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.289
+
+2023-02-08 08:49:40,526 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_26.pth was removed
+2023-02-08 08:49:52,193 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_27.pth.
+2023-02-08 08:49:52,193 - mmdet - INFO - Best bbox_mAP is 0.0847 at 27 epoch.
+2023-02-08 08:49:52,193 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:49:52,194 - mmdet - INFO - Epoch(val) [27][13]	bbox_mAP: 0.0847, bbox_mAP_50: 0.2539, bbox_mAP_75: 0.0231, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1135, bbox_mAP_copypaste: 0.0847 0.2539 0.0231 0.0000 0.0000 0.1135
+2023-02-08 08:50:13,671 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:50:13,801 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.088
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.255
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.119
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.210
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.210
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.210
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.292
+
+2023-02-08 08:50:13,874 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_27.pth was removed
+2023-02-08 08:50:37,263 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_28.pth.
+2023-02-08 08:50:37,263 - mmdet - INFO - Best bbox_mAP is 0.0883 at 28 epoch.
+2023-02-08 08:50:37,264 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:50:37,264 - mmdet - INFO - Epoch(val) [28][13]	bbox_mAP: 0.0883, bbox_mAP_50: 0.2549, bbox_mAP_75: 0.0230, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1186, bbox_mAP_copypaste: 0.0883 0.2549 0.0230 0.0000 0.0000 0.1186
+2023-02-08 08:50:58,235 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:50:58,364 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.257
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.025
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.121
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.210
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.210
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.210
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.292
+
+2023-02-08 08:50:58,448 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_28.pth was removed
+2023-02-08 08:51:25,105 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_29.pth.
+2023-02-08 08:51:25,105 - mmdet - INFO - Best bbox_mAP is 0.0899 at 29 epoch.
+2023-02-08 08:51:25,105 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:51:25,105 - mmdet - INFO - Epoch(val) [29][13]	bbox_mAP: 0.0899, bbox_mAP_50: 0.2571, bbox_mAP_75: 0.0247, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1208, bbox_mAP_copypaste: 0.0899 0.2571 0.0247 0.0000 0.0000 0.1208
+2023-02-08 08:51:41,021 - mmdet - INFO - Saving checkpoint at 30 epochs
+2023-02-08 08:51:55,240 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:51:55,399 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.257
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.025
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.121
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.214
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.214
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.214
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.297
+
+2023-02-08 08:51:55,494 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_29.pth was removed
+2023-02-08 08:52:05,121 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_30.pth.
+2023-02-08 08:52:05,121 - mmdet - INFO - Best bbox_mAP is 0.0900 at 30 epoch.
+2023-02-08 08:52:05,122 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:52:05,122 - mmdet - INFO - Epoch(val) [30][13]	bbox_mAP: 0.0900, bbox_mAP_50: 0.2570, bbox_mAP_75: 0.0246, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1210, bbox_mAP_copypaste: 0.0900 0.2570 0.0246 0.0000 0.0000 0.1210
+2023-02-08 08:52:26,945 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:52:27,072 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.255
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.025
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.214
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.214
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.214
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.297
+
+2023-02-08 08:52:27,074 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:52:27,074 - mmdet - INFO - Epoch(val) [31][13]	bbox_mAP: 0.0894, bbox_mAP_50: 0.2547, bbox_mAP_75: 0.0246, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1202, bbox_mAP_copypaste: 0.0894 0.2547 0.0246 0.0000 0.0000 0.1202
+2023-02-08 08:52:48,723 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:52:48,907 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.256
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.025
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.300
+
+2023-02-08 08:52:48,908 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:52:48,908 - mmdet - INFO - Epoch(val) [32][13]	bbox_mAP: 0.0894, bbox_mAP_50: 0.2557, bbox_mAP_75: 0.0247, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1201, bbox_mAP_copypaste: 0.0894 0.2557 0.0247 0.0000 0.0000 0.1201
+2023-02-08 08:53:10,416 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:53:10,543 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.256
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.306
+
+2023-02-08 08:53:10,544 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:53:10,545 - mmdet - INFO - Epoch(val) [33][13]	bbox_mAP: 0.0895, bbox_mAP_50: 0.2565, bbox_mAP_75: 0.0241, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1202, bbox_mAP_copypaste: 0.0895 0.2565 0.0241 0.0000 0.0000 0.1202
+2023-02-08 08:53:32,949 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:53:33,083 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.254
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.300
+
+2023-02-08 08:53:33,084 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:53:33,084 - mmdet - INFO - Epoch(val) [34][13]	bbox_mAP: 0.0890, bbox_mAP_50: 0.2544, bbox_mAP_75: 0.0245, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1195, bbox_mAP_copypaste: 0.0890 0.2544 0.0245 0.0000 0.0000 0.1195
+2023-02-08 08:53:54,337 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:53:54,474 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.257
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.025
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.121
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.306
+
+2023-02-08 08:53:54,555 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_30.pth was removed
+2023-02-08 08:54:12,183 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_35.pth.
+2023-02-08 08:54:12,183 - mmdet - INFO - Best bbox_mAP is 0.0903 at 35 epoch.
+2023-02-08 08:54:12,183 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:54:12,183 - mmdet - INFO - Epoch(val) [35][13]	bbox_mAP: 0.0903, bbox_mAP_50: 0.2575, bbox_mAP_75: 0.0249, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1215, bbox_mAP_copypaste: 0.0903 0.2575 0.0249 0.0000 0.0000 0.1215
+2023-02-08 08:54:34,146 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:54:34,267 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.088
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.253
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.118
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.300
+
+2023-02-08 08:54:34,268 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:54:34,268 - mmdet - INFO - Epoch(val) [36][13]	bbox_mAP: 0.0882, bbox_mAP_50: 0.2534, bbox_mAP_75: 0.0233, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1185, bbox_mAP_copypaste: 0.0882 0.2534 0.0233 0.0000 0.0000 0.1185
+2023-02-08 08:54:55,993 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:54:56,159 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.088
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.253
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.118
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.216
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.300
+
+2023-02-08 08:54:56,160 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:54:56,160 - mmdet - INFO - Epoch(val) [37][13]	bbox_mAP: 0.0881, bbox_mAP_50: 0.2533, bbox_mAP_75: 0.0232, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1184, bbox_mAP_copypaste: 0.0881 0.2533 0.0232 0.0000 0.0000 0.1184
+2023-02-08 08:55:17,766 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:55:17,905 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.253
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.119
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 08:55:17,906 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:55:17,907 - mmdet - INFO - Epoch(val) [38][13]	bbox_mAP: 0.0888, bbox_mAP_50: 0.2531, bbox_mAP_75: 0.0230, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1193, bbox_mAP_copypaste: 0.0888 0.2531 0.0230 0.0000 0.0000 0.1193
+2023-02-08 08:55:38,578 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:55:38,698 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.256
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.121
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.222
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.222
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.222
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.308
+
+2023-02-08 08:55:38,699 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:55:38,699 - mmdet - INFO - Epoch(val) [39][13]	bbox_mAP: 0.0900, bbox_mAP_50: 0.2565, bbox_mAP_75: 0.0231, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1210, bbox_mAP_copypaste: 0.0900 0.2565 0.0231 0.0000 0.0000 0.1210
+2023-02-08 08:55:54,665 - mmdet - INFO - Saving checkpoint at 40 epochs
+2023-02-08 08:56:07,629 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:56:07,757 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.256
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 08:56:07,759 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:56:07,759 - mmdet - INFO - Epoch(val) [40][13]	bbox_mAP: 0.0903, bbox_mAP_50: 0.2558, bbox_mAP_75: 0.0237, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1217, bbox_mAP_copypaste: 0.0903 0.2558 0.0237 0.0000 0.0000 0.1217
+2023-02-08 08:56:29,731 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:56:29,863 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.091
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.270
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 08:56:29,945 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_35.pth was removed
+2023-02-08 08:56:48,665 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_41.pth.
+2023-02-08 08:56:48,666 - mmdet - INFO - Best bbox_mAP is 0.0905 at 41 epoch.
+2023-02-08 08:56:48,668 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:56:48,668 - mmdet - INFO - Epoch(val) [41][13]	bbox_mAP: 0.0905, bbox_mAP_50: 0.2697, bbox_mAP_75: 0.0235, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1218, bbox_mAP_copypaste: 0.0905 0.2697 0.0235 0.0000 0.0000 0.1218
+2023-02-08 08:57:10,431 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:57:10,558 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.091
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.272
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 08:57:10,635 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_41.pth was removed
+2023-02-08 08:57:22,066 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_42.pth.
+2023-02-08 08:57:22,067 - mmdet - INFO - Best bbox_mAP is 0.0906 at 42 epoch.
+2023-02-08 08:57:22,067 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:57:22,067 - mmdet - INFO - Epoch(val) [42][13]	bbox_mAP: 0.0906, bbox_mAP_50: 0.2716, bbox_mAP_75: 0.0235, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1219, bbox_mAP_copypaste: 0.0906 0.2716 0.0235 0.0000 0.0000 0.1219
+2023-02-08 08:57:44,094 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:57:44,222 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.090
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.268
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.023
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.121
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.319
+
+2023-02-08 08:57:44,223 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:57:44,223 - mmdet - INFO - Epoch(val) [43][13]	bbox_mAP: 0.0901, bbox_mAP_50: 0.2684, bbox_mAP_75: 0.0230, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1214, bbox_mAP_copypaste: 0.0901 0.2684 0.0230 0.0000 0.0000 0.1214
+2023-02-08 08:58:06,106 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:58:06,241 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.093
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.273
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.125
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.319
+
+2023-02-08 08:58:06,323 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_42.pth was removed
+2023-02-08 08:58:15,587 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_44.pth.
+2023-02-08 08:58:15,587 - mmdet - INFO - Best bbox_mAP is 0.0925 at 44 epoch.
+2023-02-08 08:58:15,587 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:58:15,587 - mmdet - INFO - Epoch(val) [44][13]	bbox_mAP: 0.0925, bbox_mAP_50: 0.2732, bbox_mAP_75: 0.0238, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1249, bbox_mAP_copypaste: 0.0925 0.2732 0.0238 0.0000 0.0000 0.1249
+2023-02-08 08:58:37,048 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:58:37,171 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.094
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.274
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.128
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 08:58:37,245 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_44.pth was removed
+2023-02-08 08:58:52,744 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_45.pth.
+2023-02-08 08:58:52,744 - mmdet - INFO - Best bbox_mAP is 0.0944 at 45 epoch.
+2023-02-08 08:58:52,745 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:58:52,745 - mmdet - INFO - Epoch(val) [45][13]	bbox_mAP: 0.0944, bbox_mAP_50: 0.2738, bbox_mAP_75: 0.0236, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1276, bbox_mAP_copypaste: 0.0944 0.2738 0.0236 0.0000 0.0000 0.1276
+2023-02-08 08:59:14,449 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:59:14,606 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.096
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.277
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.129
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 08:59:14,697 - mmdet - INFO - The previous best checkpoint /root/mmdetection45/work_dirs/mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon/best_bbox_mAP_epoch_45.pth was removed
+2023-02-08 08:59:32,115 - mmdet - INFO - Now best checkpoint is saved as best_bbox_mAP_epoch_46.pth.
+2023-02-08 08:59:32,115 - mmdet - INFO - Best bbox_mAP is 0.0957 at 46 epoch.
+2023-02-08 08:59:32,115 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:59:32,116 - mmdet - INFO - Epoch(val) [46][13]	bbox_mAP: 0.0957, bbox_mAP_50: 0.2775, bbox_mAP_75: 0.0238, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1293, bbox_mAP_copypaste: 0.0957 0.2775 0.0238 0.0000 0.0000 0.1293
+2023-02-08 08:59:54,421 - mmdet - INFO - Evaluating bbox...
+2023-02-08 08:59:54,590 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.094
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.275
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.127
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.322
+
+2023-02-08 08:59:54,591 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 08:59:54,592 - mmdet - INFO - Epoch(val) [47][13]	bbox_mAP: 0.0940, bbox_mAP_50: 0.2754, bbox_mAP_75: 0.0239, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1268, bbox_mAP_copypaste: 0.0940 0.2754 0.0239 0.0000 0.0000 0.1268
+2023-02-08 09:00:17,161 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:00:17,343 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.092
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.254
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.123
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.236
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.236
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.236
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.328
+
+2023-02-08 09:00:17,344 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:00:17,344 - mmdet - INFO - Epoch(val) [48][13]	bbox_mAP: 0.0916, bbox_mAP_50: 0.2544, bbox_mAP_75: 0.0236, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1234, bbox_mAP_copypaste: 0.0916 0.2544 0.0236 0.0000 0.0000 0.1234
+2023-02-08 09:00:39,567 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:00:39,707 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.092
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.255
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.123
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.322
+
+2023-02-08 09:00:39,708 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:00:39,708 - mmdet - INFO - Epoch(val) [49][13]	bbox_mAP: 0.0916, bbox_mAP_50: 0.2552, bbox_mAP_75: 0.0238, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1234, bbox_mAP_copypaste: 0.0916 0.2552 0.0238 0.0000 0.0000 0.1234
+2023-02-08 09:00:56,435 - mmdet - INFO - Saving checkpoint at 50 epochs
+2023-02-08 09:01:23,187 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:01:23,360 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.087
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.252
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.117
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.232
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.322
+
+2023-02-08 09:01:23,362 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:01:23,362 - mmdet - INFO - Epoch(val) [50][13]	bbox_mAP: 0.0866, bbox_mAP_50: 0.2519, bbox_mAP_75: 0.0223, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1166, bbox_mAP_copypaste: 0.0866 0.2519 0.0223 0.0000 0.0000 0.1166
+2023-02-08 09:01:45,857 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:01:46,047 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.232
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.103
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.314
+
+2023-02-08 09:01:46,049 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:01:46,050 - mmdet - INFO - Epoch(val) [51][13]	bbox_mAP: 0.0772, bbox_mAP_50: 0.2319, bbox_mAP_75: 0.0181, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1033, bbox_mAP_copypaste: 0.0772 0.2319 0.0181 0.0000 0.0000 0.1033
+2023-02-08 09:02:07,815 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:02:07,960 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.084
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.242
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.113
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 09:02:07,962 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:02:07,962 - mmdet - INFO - Epoch(val) [52][13]	bbox_mAP: 0.0839, bbox_mAP_50: 0.2416, bbox_mAP_75: 0.0218, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1127, bbox_mAP_copypaste: 0.0839 0.2416 0.0218 0.0000 0.0000 0.1127
+2023-02-08 09:02:29,822 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:02:29,960 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.075
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.223
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.100
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:02:29,962 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:02:29,962 - mmdet - INFO - Epoch(val) [53][13]	bbox_mAP: 0.0745, bbox_mAP_50: 0.2227, bbox_mAP_75: 0.0178, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.0996, bbox_mAP_copypaste: 0.0745 0.2227 0.0178 0.0000 0.0000 0.0996
+2023-02-08 09:02:52,216 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:02:52,406 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.075
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.226
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.017
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.101
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.314
+
+2023-02-08 09:02:52,408 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:02:52,408 - mmdet - INFO - Epoch(val) [54][13]	bbox_mAP: 0.0753, bbox_mAP_50: 0.2259, bbox_mAP_75: 0.0173, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1010, bbox_mAP_copypaste: 0.0753 0.2259 0.0173 0.0000 0.0000 0.1010
+2023-02-08 09:03:13,981 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:03:14,170 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.227
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.019
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.103
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.319
+
+2023-02-08 09:03:14,172 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:03:14,172 - mmdet - INFO - Epoch(val) [55][13]	bbox_mAP: 0.0765, bbox_mAP_50: 0.2272, bbox_mAP_75: 0.0187, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1029, bbox_mAP_copypaste: 0.0765 0.2272 0.0187 0.0000 0.0000 0.1029
+2023-02-08 09:03:36,341 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:03:36,522 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.228
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.017
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.102
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.230
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.319
+
+2023-02-08 09:03:36,523 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:03:36,523 - mmdet - INFO - Epoch(val) [56][13]	bbox_mAP: 0.0759, bbox_mAP_50: 0.2275, bbox_mAP_75: 0.0174, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1019, bbox_mAP_copypaste: 0.0759 0.2275 0.0174 0.0000 0.0000 0.1019
+2023-02-08 09:03:58,403 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:03:58,587 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.226
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.019
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.103
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:03:58,589 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:03:58,589 - mmdet - INFO - Epoch(val) [57][13]	bbox_mAP: 0.0768, bbox_mAP_50: 0.2262, bbox_mAP_75: 0.0190, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1034, bbox_mAP_copypaste: 0.0768 0.2262 0.0190 0.0000 0.0000 0.1034
+2023-02-08 09:04:20,975 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:04:21,161 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.081
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.231
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.108
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.331
+
+2023-02-08 09:04:21,162 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:04:21,162 - mmdet - INFO - Epoch(val) [58][13]	bbox_mAP: 0.0806, bbox_mAP_50: 0.2308, bbox_mAP_75: 0.0412, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1084, bbox_mAP_copypaste: 0.0806 0.2308 0.0412 0.0000 0.0000 0.1084
+2023-02-08 09:04:43,120 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:04:43,297 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.081
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.223
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.043
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.331
+
+2023-02-08 09:04:43,298 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:04:43,299 - mmdet - INFO - Epoch(val) [59][13]	bbox_mAP: 0.0806, bbox_mAP_50: 0.2226, bbox_mAP_75: 0.0425, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1086, bbox_mAP_copypaste: 0.0806 0.2226 0.0425 0.0000 0.0000 0.1086
+2023-02-08 09:04:59,426 - mmdet - INFO - Saving checkpoint at 60 epochs
+2023-02-08 09:05:19,559 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:05:19,677 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.082
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.224
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.110
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.331
+
+2023-02-08 09:05:19,679 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:05:19,679 - mmdet - INFO - Epoch(val) [60][13]	bbox_mAP: 0.0816, bbox_mAP_50: 0.2237, bbox_mAP_75: 0.0417, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1100, bbox_mAP_copypaste: 0.0816 0.2237 0.0417 0.0000 0.0000 0.1100
+2023-02-08 09:05:41,584 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:05:41,719 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.088
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.235
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.118
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.333
+
+2023-02-08 09:05:41,720 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:05:41,720 - mmdet - INFO - Epoch(val) [61][13]	bbox_mAP: 0.0876, bbox_mAP_50: 0.2348, bbox_mAP_75: 0.0423, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1179, bbox_mAP_copypaste: 0.0876 0.2348 0.0423 0.0000 0.0000 0.1179
+2023-02-08 09:06:03,232 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:06:03,365 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.087
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.235
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.117
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.342
+
+2023-02-08 09:06:03,367 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:06:03,367 - mmdet - INFO - Epoch(val) [62][13]	bbox_mAP: 0.0871, bbox_mAP_50: 0.2348, bbox_mAP_75: 0.0414, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1173, bbox_mAP_copypaste: 0.0871 0.2348 0.0414 0.0000 0.0000 0.1173
+2023-02-08 09:06:25,222 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:06:25,393 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.087
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.236
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.118
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.333
+
+2023-02-08 09:06:25,395 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:06:25,395 - mmdet - INFO - Epoch(val) [63][13]	bbox_mAP: 0.0875, bbox_mAP_50: 0.2361, bbox_mAP_75: 0.0413, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1178, bbox_mAP_copypaste: 0.0875 0.2361 0.0413 0.0000 0.0000 0.1178
+2023-02-08 09:06:47,485 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:06:47,625 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.237
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 09:06:47,626 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:06:47,626 - mmdet - INFO - Epoch(val) [64][13]	bbox_mAP: 0.0888, bbox_mAP_50: 0.2375, bbox_mAP_75: 0.0423, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1198, bbox_mAP_copypaste: 0.0888 0.2375 0.0423 0.0000 0.0000 0.1198
+2023-02-08 09:07:09,071 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:07:09,200 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.088
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.236
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.119
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.242
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.242
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.242
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.336
+
+2023-02-08 09:07:09,201 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:07:09,201 - mmdet - INFO - Epoch(val) [65][13]	bbox_mAP: 0.0885, bbox_mAP_50: 0.2363, bbox_mAP_75: 0.0423, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1194, bbox_mAP_copypaste: 0.0885 0.2363 0.0423 0.0000 0.0000 0.1194
+2023-02-08 09:07:30,265 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:07:30,514 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.223
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.031
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.108
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:07:30,516 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:07:30,516 - mmdet - INFO - Epoch(val) [66][13]	bbox_mAP: 0.0800, bbox_mAP_50: 0.2234, bbox_mAP_75: 0.0313, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1081, bbox_mAP_copypaste: 0.0800 0.2234 0.0313 0.0000 0.0000 0.1081
+2023-02-08 09:07:52,976 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:07:53,105 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.079
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.221
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.031
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:07:53,106 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:07:53,107 - mmdet - INFO - Epoch(val) [67][13]	bbox_mAP: 0.0792, bbox_mAP_50: 0.2215, bbox_mAP_75: 0.0310, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1092, bbox_mAP_copypaste: 0.0792 0.2215 0.0310 0.0000 0.0000 0.1092
+2023-02-08 09:08:15,219 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:08:15,339 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.086
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.230
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 09:08:15,340 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:08:15,340 - mmdet - INFO - Epoch(val) [68][13]	bbox_mAP: 0.0864, bbox_mAP_50: 0.2295, bbox_mAP_75: 0.0419, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1199, bbox_mAP_copypaste: 0.0864 0.2295 0.0419 0.0000 0.0000 0.1199
+2023-02-08 09:08:37,080 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:08:37,209 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.087
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.226
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.055
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 09:08:37,210 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:08:37,210 - mmdet - INFO - Epoch(val) [69][13]	bbox_mAP: 0.0867, bbox_mAP_50: 0.2259, bbox_mAP_75: 0.0552, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1204, bbox_mAP_copypaste: 0.0867 0.2259 0.0552 0.0000 0.0000 0.1204
+2023-02-08 09:08:53,569 - mmdet - INFO - Saving checkpoint at 70 epochs
+2023-02-08 09:09:14,053 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:09:14,171 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.081
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.221
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.045
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:09:14,172 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:09:14,172 - mmdet - INFO - Epoch(val) [70][13]	bbox_mAP: 0.0805, bbox_mAP_50: 0.2206, bbox_mAP_75: 0.0452, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1094, bbox_mAP_copypaste: 0.0805 0.2206 0.0452 0.0000 0.0000 0.1094
+2023-02-08 09:09:36,605 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:09:36,741 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.233
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.057
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.121
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.234
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+
+2023-02-08 09:09:36,743 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:09:36,743 - mmdet - INFO - Epoch(val) [71][13]	bbox_mAP: 0.0889, bbox_mAP_50: 0.2327, bbox_mAP_75: 0.0571, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1209, bbox_mAP_copypaste: 0.0889 0.2327 0.0571 0.0000 0.0000 0.1209
+2023-02-08 09:09:58,320 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:09:58,486 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.217
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.045
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.108
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:09:58,487 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:09:58,487 - mmdet - INFO - Epoch(val) [72][13]	bbox_mAP: 0.0796, bbox_mAP_50: 0.2165, bbox_mAP_75: 0.0452, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1081, bbox_mAP_copypaste: 0.0796 0.2165 0.0452 0.0000 0.0000 0.1081
+2023-02-08 09:10:20,631 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:10:20,823 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.078
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.219
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.106
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 09:10:20,825 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:10:20,825 - mmdet - INFO - Epoch(val) [73][13]	bbox_mAP: 0.0784, bbox_mAP_50: 0.2189, bbox_mAP_75: 0.0412, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1065, bbox_mAP_copypaste: 0.0784 0.2189 0.0412 0.0000 0.0000 0.1065
+2023-02-08 09:10:42,837 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:10:42,987 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.219
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.026
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.103
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.289
+
+2023-02-08 09:10:42,989 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:10:42,989 - mmdet - INFO - Epoch(val) [74][13]	bbox_mAP: 0.0758, bbox_mAP_50: 0.2193, bbox_mAP_75: 0.0256, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1032, bbox_mAP_copypaste: 0.0758 0.2193 0.0256 0.0000 0.0000 0.1032
+2023-02-08 09:11:05,467 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:11:05,658 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.079
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.230
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.108
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 09:11:05,660 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:11:05,660 - mmdet - INFO - Epoch(val) [75][13]	bbox_mAP: 0.0795, bbox_mAP_50: 0.2299, bbox_mAP_75: 0.0412, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1081, bbox_mAP_copypaste: 0.0795 0.2299 0.0412 0.0000 0.0000 0.1081
+2023-02-08 09:11:28,415 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:11:28,607 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.079
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.236
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.108
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.289
+
+2023-02-08 09:11:28,608 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:11:28,608 - mmdet - INFO - Epoch(val) [76][13]	bbox_mAP: 0.0791, bbox_mAP_50: 0.2359, bbox_mAP_75: 0.0406, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1077, bbox_mAP_copypaste: 0.0791 0.2359 0.0406 0.0000 0.0000 0.1077
+2023-02-08 09:11:50,392 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:11:50,571 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.221
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.040
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.105
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.289
+
+2023-02-08 09:11:50,572 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:11:50,572 - mmdet - INFO - Epoch(val) [77][13]	bbox_mAP: 0.0774, bbox_mAP_50: 0.2210, bbox_mAP_75: 0.0404, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1054, bbox_mAP_copypaste: 0.0774 0.2210 0.0404 0.0000 0.0000 0.1054
+2023-02-08 09:12:12,850 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:12:13,035 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.080
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.240
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.289
+
+2023-02-08 09:12:13,037 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:12:13,037 - mmdet - INFO - Epoch(val) [78][13]	bbox_mAP: 0.0800, bbox_mAP_50: 0.2402, bbox_mAP_75: 0.0405, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1091, bbox_mAP_copypaste: 0.0800 0.2402 0.0405 0.0000 0.0000 0.1091
+2023-02-08 09:12:35,395 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:12:35,534 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.079
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.226
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.208
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.289
+
+2023-02-08 09:12:35,536 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:12:35,536 - mmdet - INFO - Epoch(val) [79][13]	bbox_mAP: 0.0792, bbox_mAP_50: 0.2265, bbox_mAP_75: 0.0413, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1085, bbox_mAP_copypaste: 0.0792 0.2265 0.0413 0.0000 0.0000 0.1085
+2023-02-08 09:12:51,959 - mmdet - INFO - Saving checkpoint at 80 epochs
+2023-02-08 09:13:15,409 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:13:15,544 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.091
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.252
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.053
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.125
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 09:13:15,545 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:13:15,545 - mmdet - INFO - Epoch(val) [80][13]	bbox_mAP: 0.0907, bbox_mAP_50: 0.2521, bbox_mAP_75: 0.0530, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1246, bbox_mAP_copypaste: 0.0907 0.2521 0.0530 0.0000 0.0000 0.1246
+2023-02-08 09:13:37,182 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:13:37,345 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.091
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.249
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.054
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.125
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.306
+
+2023-02-08 09:13:37,346 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:13:37,347 - mmdet - INFO - Epoch(val) [81][13]	bbox_mAP: 0.0908, bbox_mAP_50: 0.2493, bbox_mAP_75: 0.0543, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1246, bbox_mAP_copypaste: 0.0908 0.2493 0.0543 0.0000 0.0000 0.1246
+2023-02-08 09:13:59,099 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:13:59,329 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.247
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.054
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 09:13:59,331 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:13:59,331 - mmdet - INFO - Epoch(val) [82][13]	bbox_mAP: 0.0885, bbox_mAP_50: 0.2474, bbox_mAP_75: 0.0541, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1215, bbox_mAP_copypaste: 0.0885 0.2474 0.0541 0.0000 0.0000 0.1215
+2023-02-08 09:14:21,785 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:14:21,916 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.081
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.225
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.037
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.115
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.306
+
+2023-02-08 09:14:21,917 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:14:21,917 - mmdet - INFO - Epoch(val) [83][13]	bbox_mAP: 0.0806, bbox_mAP_50: 0.2252, bbox_mAP_75: 0.0374, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1146, bbox_mAP_copypaste: 0.0806 0.2252 0.0374 0.0000 0.0000 0.1146
+2023-02-08 09:14:43,704 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:14:43,843 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.214
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.038
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.110
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 09:14:43,844 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:14:43,844 - mmdet - INFO - Epoch(val) [84][13]	bbox_mAP: 0.0761, bbox_mAP_50: 0.2143, bbox_mAP_75: 0.0380, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1096, bbox_mAP_copypaste: 0.0761 0.2143 0.0380 0.0000 0.0000 0.1096
+2023-02-08 09:15:05,524 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:15:05,711 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.213
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.031
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.108
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.294
+
+2023-02-08 09:15:05,713 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:15:05,713 - mmdet - INFO - Epoch(val) [85][13]	bbox_mAP: 0.0758, bbox_mAP_50: 0.2129, bbox_mAP_75: 0.0310, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1083, bbox_mAP_copypaste: 0.0758 0.2129 0.0310 0.0000 0.0000 0.1083
+2023-02-08 09:15:27,536 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:15:27,669 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.074
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.216
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.029
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.109
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.294
+
+2023-02-08 09:15:27,670 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:15:27,671 - mmdet - INFO - Epoch(val) [86][13]	bbox_mAP: 0.0744, bbox_mAP_50: 0.2163, bbox_mAP_75: 0.0291, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1088, bbox_mAP_copypaste: 0.0744 0.2163 0.0291 0.0000 0.0000 0.1088
+2023-02-08 09:15:49,499 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:15:49,644 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.078
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.230
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.028
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.116
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 09:15:49,645 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:15:49,646 - mmdet - INFO - Epoch(val) [87][13]	bbox_mAP: 0.0782, bbox_mAP_50: 0.2303, bbox_mAP_75: 0.0284, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1157, bbox_mAP_copypaste: 0.0782 0.2303 0.0284 0.0000 0.0000 0.1157
+2023-02-08 09:16:11,080 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:16:11,216 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.221
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.028
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.116
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.218
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.303
+
+2023-02-08 09:16:11,220 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:16:11,220 - mmdet - INFO - Epoch(val) [88][13]	bbox_mAP: 0.0765, bbox_mAP_50: 0.2205, bbox_mAP_75: 0.0284, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1164, bbox_mAP_copypaste: 0.0765 0.2205 0.0284 0.0000 0.0000 0.1164
+2023-02-08 09:16:32,361 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:16:32,505 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.221
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.028
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.117
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.220
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.306
+
+2023-02-08 09:16:32,506 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:16:32,506 - mmdet - INFO - Epoch(val) [89][13]	bbox_mAP: 0.0766, bbox_mAP_50: 0.2213, bbox_mAP_75: 0.0284, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1172, bbox_mAP_copypaste: 0.0766 0.2213 0.0284 0.0000 0.0000 0.1172
+2023-02-08 09:16:48,969 - mmdet - INFO - Saving checkpoint at 90 epochs
+2023-02-08 09:17:15,379 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:17:15,533 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.234
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.029
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.115
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.294
+
+2023-02-08 09:17:15,534 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:17:15,534 - mmdet - INFO - Epoch(val) [90][13]	bbox_mAP: 0.0773, bbox_mAP_50: 0.2335, bbox_mAP_75: 0.0286, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1154, bbox_mAP_copypaste: 0.0773 0.2335 0.0286 0.0000 0.0000 0.1154
+2023-02-08 09:17:37,699 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:17:37,833 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.078
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.224
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.033
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:17:37,834 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:17:37,834 - mmdet - INFO - Epoch(val) [91][13]	bbox_mAP: 0.0777, bbox_mAP_50: 0.2237, bbox_mAP_75: 0.0330, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1218, bbox_mAP_copypaste: 0.0777 0.2237 0.0330 0.0000 0.0000 0.1218
+2023-02-08 09:17:59,679 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:17:59,810 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.217
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.033
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.121
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:17:59,811 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:17:59,811 - mmdet - INFO - Epoch(val) [92][13]	bbox_mAP: 0.0761, bbox_mAP_50: 0.2170, bbox_mAP_75: 0.0330, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1214, bbox_mAP_copypaste: 0.0761 0.2170 0.0330 0.0000 0.0000 0.1214
+2023-02-08 09:18:21,161 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:18:21,304 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.218
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.033
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:18:21,305 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:18:21,305 - mmdet - INFO - Epoch(val) [93][13]	bbox_mAP: 0.0769, bbox_mAP_50: 0.2182, bbox_mAP_75: 0.0330, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1216, bbox_mAP_copypaste: 0.0769 0.2182 0.0330 0.0000 0.0000 0.1216
+2023-02-08 09:18:42,845 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:18:43,004 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.221
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.033
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:18:43,005 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:18:43,005 - mmdet - INFO - Epoch(val) [94][13]	bbox_mAP: 0.0768, bbox_mAP_50: 0.2215, bbox_mAP_75: 0.0331, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1217, bbox_mAP_copypaste: 0.0768 0.2215 0.0331 0.0000 0.0000 0.1217
+2023-02-08 09:19:04,457 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:19:04,580 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.213
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.033
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.120
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.228
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.317
+
+2023-02-08 09:19:04,581 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:19:04,581 - mmdet - INFO - Epoch(val) [95][13]	bbox_mAP: 0.0757, bbox_mAP_50: 0.2135, bbox_mAP_75: 0.0330, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1199, bbox_mAP_copypaste: 0.0757 0.2135 0.0330 0.0000 0.0000 0.1199
+2023-02-08 09:19:26,402 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:19:26,531 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.074
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.202
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.032
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.116
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.314
+
+2023-02-08 09:19:26,532 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:19:26,533 - mmdet - INFO - Epoch(val) [96][13]	bbox_mAP: 0.0737, bbox_mAP_50: 0.2020, bbox_mAP_75: 0.0325, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1158, bbox_mAP_copypaste: 0.0737 0.2020 0.0325 0.0000 0.0000 0.1158
+2023-02-08 09:19:48,220 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:19:48,356 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.071
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.201
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.032
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.115
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.226
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.314
+
+2023-02-08 09:19:48,357 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:19:48,357 - mmdet - INFO - Epoch(val) [97][13]	bbox_mAP: 0.0708, bbox_mAP_50: 0.2011, bbox_mAP_75: 0.0316, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1150, bbox_mAP_copypaste: 0.0708 0.2011 0.0316 0.0000 0.0000 0.1150
+2023-02-08 09:20:10,417 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:20:10,554 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.075
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.211
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.034
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.238
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.331
+
+2023-02-08 09:20:10,556 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:20:10,556 - mmdet - INFO - Epoch(val) [98][13]	bbox_mAP: 0.0754, bbox_mAP_50: 0.2111, bbox_mAP_75: 0.0336, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1220, bbox_mAP_copypaste: 0.0754 0.2111 0.0336 0.0000 0.0000 0.1220
+2023-02-08 09:20:33,256 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:20:33,448 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.072
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.202
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.032
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.118
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.333
+
+2023-02-08 09:20:33,450 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:20:33,450 - mmdet - INFO - Epoch(val) [99][13]	bbox_mAP: 0.0724, bbox_mAP_50: 0.2021, bbox_mAP_75: 0.0323, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1180, bbox_mAP_copypaste: 0.0724 0.2021 0.0323 0.0000 0.0000 0.1180
+2023-02-08 09:20:49,746 - mmdet - INFO - Saving checkpoint at 100 epochs
+2023-02-08 09:21:09,697 - mmdet - INFO - Evaluating bbox...
+2023-02-08 09:21:09,985 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.073
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.197
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.033
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.119
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.342
+
+2023-02-08 09:21:09,987 - mmdet - INFO - Exp name: mask_rcnn_r50_caffe_fpn_mstrain-poly_1x_balloon.py
+2023-02-08 09:21:09,987 - mmdet - INFO - Epoch(val) [100][13]	bbox_mAP: 0.0728, bbox_mAP_50: 0.1974, bbox_mAP_75: 0.0333, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0000, bbox_mAP_l: 0.1186, bbox_mAP_copypaste: 0.0728 0.1974 0.0333 0.0000 0.0000 0.1186
